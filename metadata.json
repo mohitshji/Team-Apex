@@ -1,0 +1,6 @@
+{
+  "name": "GGSIPU Smart Energy & HVAC Demand Forecasting",
+  "description": "Smart energy and HVAC demand forecasting, microclimate comfort control, and real-time building management system for Guru Gobind Singh Indraprastha University East Delhi Campus.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

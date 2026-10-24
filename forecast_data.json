@@ -1,0 +1,334 @@
+{
+  "weather_context": {
+    "location": "Safdarjung, Delhi",
+    "season": "Summer",
+    "outdoor_temp_c": 37.15,
+    "indoor_comfort_rules": {
+      "target_setpoint": 25.1,
+      "hvac_mode": "Dry Mode (Dehumidification)",
+      "thermal_shock_safe": false,
+      "delta_temp": 12.0
+    }
+  },
+  "metrics": {
+    "unoptimized_peak_kw": 168.0,
+    "optimized_peak_kw": 161.6,
+    "peak_reduction_kw": 6.4,
+    "total_kwh_saved": 432.2,
+    "mae_kw": 43.22,
+    "rmse_kw": 53.52,
+    "mape_percent": 29.75
+  },
+  "hourly_timeline": [
+    {
+      "hour": 8,
+      "time_str": "08:00",
+      "total_students": 0,
+      "unoptimized_kw": 141.0,
+      "optimized_kw": 55.7,
+      "kwh_saved": 85.3,
+      "zones": {
+        "Block-A": {
+          "status": "THROTTLED (20% Airflow)",
+          "target_setpoint": "28.0°C (Unoccupied Setback)",
+          "students": 0,
+          "kw_unoptimized": 47.0,
+          "kw_optimized": 18.6
+        },
+        "Lab-Wing": {
+          "status": "THROTTLED (20% Airflow)",
+          "target_setpoint": "28.0°C (Unoccupied Setback)",
+          "students": 0,
+          "kw_unoptimized": 47.0,
+          "kw_optimized": 18.6
+        },
+        "Block-B": {
+          "status": "THROTTLED (20% Airflow)",
+          "target_setpoint": "28.0°C (Unoccupied Setback)",
+          "students": 0,
+          "kw_unoptimized": 47.0,
+          "kw_optimized": 18.6
+        }
+      }
+    },
+    {
+      "hour": 9,
+      "time_str": "09:00",
+      "total_students": 150,
+      "unoptimized_kw": 156.0,
+      "optimized_kw": 123.3,
+      "kwh_saved": 32.7,
+      "zones": {
+        "Block-A": {
+          "status": "ACTIVE (120 Students)",
+          "target_setpoint": "25.1°C (Dry Mode (Dehumidification))",
+          "students": 120,
+          "kw_unoptimized": 59.0,
+          "kw_optimized": 56.9
+        },
+        "Lab-Wing": {
+          "status": "ACTIVE (30 Students)",
+          "target_setpoint": "25.1°C (Dry Mode (Dehumidification))",
+          "students": 30,
+          "kw_unoptimized": 50.0,
+          "kw_optimized": 47.9
+        },
+        "Block-B": {
+          "status": "THROTTLED (20% Airflow)",
+          "target_setpoint": "28.0°C (Unoccupied Setback)",
+          "students": 0,
+          "kw_unoptimized": 47.0,
+          "kw_optimized": 18.6
+        }
+      }
+    },
+    {
+      "hour": 10,
+      "time_str": "10:00",
+      "total_students": 270,
+      "unoptimized_kw": 168.0,
+      "optimized_kw": 161.6,
+      "kwh_saved": 6.4,
+      "zones": {
+        "Block-A": {
+          "status": "ACTIVE (120 Students)",
+          "target_setpoint": "25.1°C (Dry Mode (Dehumidification))",
+          "students": 120,
+          "kw_unoptimized": 59.0,
+          "kw_optimized": 56.9
+        },
+        "Lab-Wing": {
+          "status": "ACTIVE (30 Students)",
+          "target_setpoint": "25.1°C (Dry Mode (Dehumidification))",
+          "students": 30,
+          "kw_unoptimized": 50.0,
+          "kw_optimized": 47.9
+        },
+        "Block-B": {
+          "status": "ACTIVE (120 Students)",
+          "target_setpoint": "25.1°C (Dry Mode (Dehumidification))",
+          "students": 120,
+          "kw_unoptimized": 59.0,
+          "kw_optimized": 56.9
+        }
+      }
+    },
+    {
+      "hour": 11,
+      "time_str": "11:00",
+      "total_students": 210,
+      "unoptimized_kw": 162.0,
+      "optimized_kw": 155.6,
+      "kwh_saved": 6.4,
+      "zones": {
+        "Block-A": {
+          "status": "ACTIVE (60 Students)",
+          "target_setpoint": "25.1°C (Dry Mode (Dehumidification))",
+          "students": 60,
+          "kw_unoptimized": 53.0,
+          "kw_optimized": 50.9
+        },
+        "Lab-Wing": {
+          "status": "ACTIVE (30 Students)",
+          "target_setpoint": "25.1°C (Dry Mode (Dehumidification))",
+          "students": 30,
+          "kw_unoptimized": 50.0,
+          "kw_optimized": 47.9
+        },
+        "Block-B": {
+          "status": "ACTIVE (120 Students)",
+          "target_setpoint": "25.1°C (Dry Mode (Dehumidification))",
+          "students": 120,
+          "kw_unoptimized": 59.0,
+          "kw_optimized": 56.9
+        }
+      }
+    },
+    {
+      "hour": 12,
+      "time_str": "12:00",
+      "total_students": 90,
+      "unoptimized_kw": 150.0,
+      "optimized_kw": 117.3,
+      "kwh_saved": 32.7,
+      "zones": {
+        "Block-A": {
+          "status": "ACTIVE (60 Students)",
+          "target_setpoint": "25.1°C (Dry Mode (Dehumidification))",
+          "students": 60,
+          "kw_unoptimized": 53.0,
+          "kw_optimized": 50.9
+        },
+        "Lab-Wing": {
+          "status": "ACTIVE (30 Students)",
+          "target_setpoint": "25.1°C (Dry Mode (Dehumidification))",
+          "students": 30,
+          "kw_unoptimized": 50.0,
+          "kw_optimized": 47.9
+        },
+        "Block-B": {
+          "status": "THROTTLED (20% Airflow)",
+          "target_setpoint": "28.0°C (Unoccupied Setback)",
+          "students": 0,
+          "kw_unoptimized": 47.0,
+          "kw_optimized": 18.6
+        }
+      }
+    },
+    {
+      "hour": 13,
+      "time_str": "13:00",
+      "total_students": 180,
+      "unoptimized_kw": 159.0,
+      "optimized_kw": 126.3,
+      "kwh_saved": 32.7,
+      "zones": {
+        "Block-A": {
+          "status": "ACTIVE (60 Students)",
+          "target_setpoint": "25.1°C (Dry Mode (Dehumidification))",
+          "students": 60,
+          "kw_unoptimized": 53.0,
+          "kw_optimized": 50.9
+        },
+        "Lab-Wing": {
+          "status": "THROTTLED (20% Airflow)",
+          "target_setpoint": "28.0°C (Unoccupied Setback)",
+          "students": 0,
+          "kw_unoptimized": 47.0,
+          "kw_optimized": 18.6
+        },
+        "Block-B": {
+          "status": "ACTIVE (120 Students)",
+          "target_setpoint": "25.1°C (Dry Mode (Dehumidification))",
+          "students": 120,
+          "kw_unoptimized": 59.0,
+          "kw_optimized": 56.9
+        }
+      }
+    },
+    {
+      "hour": 14,
+      "time_str": "14:00",
+      "total_students": 210,
+      "unoptimized_kw": 162.0,
+      "optimized_kw": 155.6,
+      "kwh_saved": 6.4,
+      "zones": {
+        "Block-A": {
+          "status": "ACTIVE (60 Students)",
+          "target_setpoint": "25.1°C (Dry Mode (Dehumidification))",
+          "students": 60,
+          "kw_unoptimized": 53.0,
+          "kw_optimized": 50.9
+        },
+        "Lab-Wing": {
+          "status": "ACTIVE (30 Students)",
+          "target_setpoint": "25.1°C (Dry Mode (Dehumidification))",
+          "students": 30,
+          "kw_unoptimized": 50.0,
+          "kw_optimized": 47.9
+        },
+        "Block-B": {
+          "status": "ACTIVE (120 Students)",
+          "target_setpoint": "25.1°C (Dry Mode (Dehumidification))",
+          "students": 120,
+          "kw_unoptimized": 59.0,
+          "kw_optimized": 56.9
+        }
+      }
+    },
+    {
+      "hour": 15,
+      "time_str": "15:00",
+      "total_students": 30,
+      "unoptimized_kw": 144.0,
+      "optimized_kw": 85.0,
+      "kwh_saved": 59.0,
+      "zones": {
+        "Block-A": {
+          "status": "THROTTLED (20% Airflow)",
+          "target_setpoint": "28.0°C (Unoccupied Setback)",
+          "students": 0,
+          "kw_unoptimized": 47.0,
+          "kw_optimized": 18.6
+        },
+        "Lab-Wing": {
+          "status": "ACTIVE (30 Students)",
+          "target_setpoint": "25.1°C (Dry Mode (Dehumidification))",
+          "students": 30,
+          "kw_unoptimized": 50.0,
+          "kw_optimized": 47.9
+        },
+        "Block-B": {
+          "status": "THROTTLED (20% Airflow)",
+          "target_setpoint": "28.0°C (Unoccupied Setback)",
+          "students": 0,
+          "kw_unoptimized": 47.0,
+          "kw_optimized": 18.6
+        }
+      }
+    },
+    {
+      "hour": 16,
+      "time_str": "16:00",
+      "total_students": 0,
+      "unoptimized_kw": 141.0,
+      "optimized_kw": 55.7,
+      "kwh_saved": 85.3,
+      "zones": {
+        "Block-A": {
+          "status": "THROTTLED (20% Airflow)",
+          "target_setpoint": "28.0°C (Unoccupied Setback)",
+          "students": 0,
+          "kw_unoptimized": 47.0,
+          "kw_optimized": 18.6
+        },
+        "Lab-Wing": {
+          "status": "THROTTLED (20% Airflow)",
+          "target_setpoint": "28.0°C (Unoccupied Setback)",
+          "students": 0,
+          "kw_unoptimized": 47.0,
+          "kw_optimized": 18.6
+        },
+        "Block-B": {
+          "status": "THROTTLED (20% Airflow)",
+          "target_setpoint": "28.0°C (Unoccupied Setback)",
+          "students": 0,
+          "kw_unoptimized": 47.0,
+          "kw_optimized": 18.6
+        }
+      }
+    },
+    {
+      "hour": 17,
+      "time_str": "17:00",
+      "total_students": 0,
+      "unoptimized_kw": 141.0,
+      "optimized_kw": 55.7,
+      "kwh_saved": 85.3,
+      "zones": {
+        "Block-A": {
+          "status": "THROTTLED (20% Airflow)",
+          "target_setpoint": "28.0°C (Unoccupied Setback)",
+          "students": 0,
+          "kw_unoptimized": 47.0,
+          "kw_optimized": 18.6
+        },
+        "Lab-Wing": {
+          "status": "THROTTLED (20% Airflow)",
+          "target_setpoint": "28.0°C (Unoccupied Setback)",
+          "students": 0,
+          "kw_unoptimized": 47.0,
+          "kw_optimized": 18.6
+        },
+        "Block-B": {
+          "status": "THROTTLED (20% Airflow)",
+          "target_setpoint": "28.0°C (Unoccupied Setback)",
+          "students": 0,
+          "kw_unoptimized": 47.0,
+          "kw_optimized": 18.6
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>GGSIPU Smart Energy &amp; HVAC Demand Forecasting</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          "on-secondary-fixed-variant": "#4a3068",
+          "on-error-container": "#9b1c1c",
+          "surface-container-lowest": "#ffffff",
+          "on-secondary": "#ffffff",
+          "on-secondary-container": "#2e2040",
+          "secondary-fixed-dim": "#c8a8e8",
+          "secondary-container": "#eedcff",
+          "surface-container-high": "#f2e8f2",
+          "tertiary-container": "#40c0ee",
+          "on-background": "#2e1a28",
+          "on-primary-fixed": "#3d0028",
+          "primary-container": "#ffd6ee",
+          "on-primary-fixed-variant": "#a02070",
+          "inverse-primary": "#f0a0cc",
+          "on-surface-variant": "#604868",
+          "on-tertiary-fixed-variant": "#005580",
+          "surface-container-low": "#fbf2fb",
+          "on-surface": "#2e1a28",
+          "surface-bright": "#fef7ff",
+          "error-container": "#ffe8e8",
+          "tertiary": "#0096cc",
+          "surface-container-highest": "#ece2ec",
+          "inverse-surface": "#2e1a28",
+          "on-primary-container": "#2e1a28",
+          "surface-container": "#f8eef8",
+          "on-tertiary-fixed": "#001a33",
+          "primary": "#e040a0",
+          "on-primary": "#ffffff",
+          "on-tertiary-container": "#00334d",
+          "surface": "#ffffff",
+          "on-error": "#ffffff",
+          "inverse-on-surface": "#fef7ff",
+          "secondary-fixed": "#eedcff",
+          "tertiary-fixed": "#c8eaff",
+          "secondary": "#7c52aa",
+          "outline": "#907898",
+          "outline-variant": "#f0d5e8"
+        },
+        fontFamily: {
+          sans: ['"DM Sans"', 'sans-serif'],
+          mono: ['"JetBrains Mono"', 'monospace'],
+        },
+        borderRadius: {
+          'DEFAULT': '1rem',
+          'lg': '1.5rem',
+          'xl': '2rem',
+          'full': '9999px'
+        }
+      }
+    }
+  }
+</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300..900;1,9..40,300..900&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<style>
+    :root {
+      --primary: #e040a0;
+      --primary-glow: rgba(224, 64, 160, 0.35);
+      --bg-candy: #faf3f8;
+      --card-bg: #ffffff;
+      --card-border: rgba(224, 64, 160, 0.16);
+      --card-border-subtle: rgba(144, 120, 152, 0.2);
+    }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background-color: var(--bg-candy);
+      color: #2e1a28;
+      -webkit-font-smoothing: antialiased;
+    }
+    .mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .candy-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      box-shadow: 0 4px 20px -2px rgba(224, 64, 160, 0.08), 0 1px 3px rgba(0, 0, 0, 0.04);
+      border-radius: 1.5rem;
+    }
+    .candy-card-subtle {
+      background: #fdf5fa;
+      border: 1px solid rgba(224, 64, 160, 0.14);
+      border-radius: 1rem;
+    }
+    .pulse-dot {
+      box-shadow: 0 0 0 0 rgba(224, 64, 160, 0.7);
+      animation: pulseCandy 2s infinite;
+    }
+    @keyframes pulseCandy {
+      0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(224, 64, 160, 0.7);
+      }
+      70% {
+        transform: scale(1);
+        box-shadow: 0 0 0 8px rgba(224, 64, 160, 0);
+      }
+      100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(224, 64, 160, 0);
+      }
+    }
+    /* Custom Candy Time Slider */
+    input[type=range] {
+      -webkit-appearance: none;
+      background: #f3d4e8;
+      border-radius: 9999px;
+      height: 8px;
+      outline: none;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 22px;
+      height: 22px;
+      border-radius: 9999px;
+      background: #e040a0;
+      cursor: pointer;
+      box-shadow: 0 0 14px rgba(224, 64, 160, 0.6);
+      border: 3px solid #ffffff;
+      transition: transform 0.15s ease;
+    }
+    input[type=range]::-webkit-slider-thumb:hover {
+      transform: scale(1.18);
+    }
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      height: 6px;
+      width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #faedf5;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #eab4d6;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #e040a0;
+    }
+  </style>
+</head>
+<body class="min-h-screen selection:bg-[#e040a0]/20 selection:text-[#e040a0]">
+<!-- TOP HEADER & BRANDING (FULL WIDTH WIDESCREEN) -->
+<header class="sticky top-0 z-50 bg-white/90 border-b border-[#e040a0]/15 px-6 lg:px-10 py-3.5 backdrop-blur-xl shadow-sm">
+<div class="max-w-[1500px] mx-auto flex items-center justify-between gap-4">
+<div>
+<h1 class="text-base lg:text-lg font-extrabold text-[#2e1a28] tracking-tight leading-tight flex items-center gap-2.5">
+<span class="w-2.5 h-2.5 rounded-full bg-[#e040a0] shadow-[0_0_8px_#e040a0]"></span>
+  Guru Gobind Singh Indraprastha University
+</h1>
+<p class="text-xs font-medium text-[#604868] leading-tight mt-0.5">East Delhi Campus • Smart Energy &amp; HVAC Demand Forecasting</p>
+</div>
+<!-- Status Badge -->
+<div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#fdf0f7] border border-[#e040a0]/30 text-[#e040a0] shadow-sm shrink-0">
+<span class="w-2 h-2 rounded-full bg-[#e040a0] pulse-dot"></span>
+<span class="text-xs font-bold tracking-wider uppercase">BMS Online</span>
+</div>
+</div>
+</header>
+<main class="max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+<!-- TOP SUMMARY ROW: MICROCLIMATE & COMFORT CONTROL CARDS (4-COLUMN WIDESCREEN GRID) -->
+<section>
+<div class="flex items-center justify-between mb-3">
+<span class="text-xs font-bold tracking-wider uppercase text-[#604868]">Microclimate &amp; Comfort Control</span>
+<span class="text-[11px] mono bg-[#ffd6ee]/70 px-3 py-1 rounded-full border border-[#e040a0]/30 text-[#a02070] font-bold tracking-wide">LIVE FEED</span>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+<!-- Outdoor Weather -->
+<div class="candy-card p-5 relative overflow-hidden flex flex-col justify-between hover:shadow-md transition-shadow">
+<div>
+<div class="flex items-center justify-between text-[#604868] mb-1">
+<span class="text-xs font-bold tracking-wide uppercase">Outdoor Temp</span>
+<div class="w-8 h-8 rounded-full bg-[#fdf0f7] flex items-center justify-center text-[#e040a0]">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+</div>
+<div class="text-3xl lg:text-4xl font-black text-[#e040a0] tracking-tight drop-shadow-sm">37.15°C</div>
+</div>
+<div class="text-[11px] text-[#604868] mt-3 flex items-center justify-between pt-2.5 border-t border-[#e040a0]/15">
+<span>RH: <span class="text-[#2e1a28] font-bold">64%</span></span>
+<span class="text-[#b45309] font-bold flex items-center gap-1.5 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200">
+<span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>Heat Index: High
+</span>
+</div>
+</div>
+<!-- Target Setpoint -->
+<div class="candy-card p-5 relative overflow-hidden flex flex-col justify-between hover:shadow-md transition-shadow">
+<div>
+<div class="flex items-center justify-between text-[#604868] mb-1">
+<span class="text-xs font-bold tracking-wide uppercase">Target Setpoint</span>
+<div class="w-8 h-8 rounded-full bg-[#fdf0f7] flex items-center justify-center text-[#e040a0]">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+</div>
+<div class="text-3xl lg:text-4xl font-black text-[#2e1a28] tracking-tight">25.1°C</div>
+</div>
+<div class="text-[11px] text-[#604868] mt-3 pt-2.5 border-t border-[#e040a0]/15 flex items-center justify-between">
+<span>Mode:</span>
+<span class="text-[#a02070] font-bold bg-[#ffd6ee]/60 px-2.5 py-0.5 rounded-full border border-[#e040a0]/25">Dry Mode (BEE)</span>
+</div>
+</div>
+<!-- Thermal Shock Safety Check -->
+<div class="candy-card p-5 relative overflow-hidden flex flex-col justify-between hover:shadow-md transition-shadow">
+<div>
+<div class="flex items-center justify-between text-[#604868] mb-1">
+<span class="text-xs font-bold tracking-wide uppercase">Thermal Safety</span>
+<div class="w-8 h-8 rounded-full bg-[#fdf0f7] flex items-center justify-center text-[#e040a0]">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+</div>
+<div class="mt-2">
+<span class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-extrabold tracking-wide uppercase bg-[#ffd6ee] text-[#a02070] border border-[#e040a0]/40 shadow-sm">
+                ΔT &gt; 12°C Guard
+              </span>
+</div>
+</div>
+<div class="text-[11px] text-[#604868] mt-3 pt-2.5 border-t border-[#e040a0]/15 flex items-center justify-between">
+<span>Status:</span>
+<span class="text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">Active</span>
+</div>
+</div>
+<!-- Daily Savings Summary -->
+<div class="candy-card p-5 relative overflow-hidden flex flex-col justify-between hover:shadow-md transition-shadow">
+<div>
+<div class="flex items-center justify-between text-[#604868] mb-1">
+<span class="text-xs font-bold tracking-wide uppercase">Daily Savings</span>
+<div class="w-8 h-8 rounded-full bg-[#fdf0f7] flex items-center justify-center text-[#e040a0]">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+</div>
+<div class="text-3xl lg:text-4xl font-black text-[#e040a0] tracking-tight drop-shadow-sm">432.2 <span class="text-sm text-[#604868] font-bold">kWh</span></div>
+</div>
+<div class="text-[11px] text-[#604868] mt-3 pt-2.5 border-t border-[#e040a0]/15 flex items-center justify-between">
+<span>Peak shed:</span>
+<span class="font-extrabold text-[#e040a0]">6.4 kW <span class="font-semibold text-[#604868]">(14.2%)</span></span>
+</div>
+</div>
+</div>
+</section>
+<!-- MAIN CONTENT WIDESCREEN GRID (7:5 RATIO) -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+<!-- LEFT COLUMN: WIDE ANALYTICS & FORECASTING (lg:col-span-7) -->
+<div class="lg:col-span-7 space-y-6">
+<!-- PS-21 ERROR METRICS PANEL -->
+<section class="candy-card p-5 shadow-sm">
+<div class="flex items-center justify-between mb-4">
+<div class="flex items-center space-x-2.5">
+<span class="w-2.5 h-4 bg-[#e040a0] rounded-full shadow-[0_0_8px_#e040a0]"></span>
+<h2 class="text-xs font-extrabold text-[#2e1a28] uppercase tracking-wider">PS-21 AI Model Error Metrics</h2>
+</div>
+<span class="text-[11px] mono text-[#a02070] bg-[#ffd6ee]/70 px-3 py-1 rounded-full border border-[#e040a0]/30 font-bold">v2.4 LTS</span>
+</div>
+<div class="grid grid-cols-3 gap-3.5">
+<div class="candy-card-subtle p-3.5 text-center">
+<span class="block text-[11px] text-[#604868] font-bold uppercase tracking-wider">MAE</span>
+<span class="block text-xl lg:text-2xl font-black text-[#e040a0] mt-1 mono">43.22 <span class="text-xs font-medium text-[#604868]">kW</span></span>
+</div>
+<div class="candy-card-subtle p-3.5 text-center">
+<span class="block text-[11px] text-[#604868] font-bold uppercase tracking-wider">RMSE</span>
+<span class="block text-xl lg:text-2xl font-black text-[#7c52aa] mt-1 mono">53.52 <span class="text-xs font-medium text-[#604868]">kW</span></span>
+</div>
+<div class="candy-card-subtle p-3.5 text-center">
+<span class="block text-[11px] text-[#604868] font-bold uppercase tracking-wider">MAPE</span>
+<span class="block text-xl lg:text-2xl font-black text-[#e040a0] mt-1 mono">29.75<span class="text-xs font-medium text-[#604868]">%</span></span>
+</div>
+</div>
+</section>
+<!-- MAIN HOURLY POWER DEMAND FORECAST CHART -->
+<section class="candy-card p-5 shadow-sm space-y-4">
+<div class="flex items-center justify-between">
+<div>
+<h2 class="text-base font-extrabold text-[#2e1a28] tracking-tight">Hourly Power Demand Forecast</h2>
+<p class="text-xs text-[#604868] font-medium">Baseline Unoptimized vs. Smart BEE Controlled</p>
+</div>
+<div class="text-[11px] mono bg-[#ffd6ee]/60 px-3 py-1 rounded-full text-[#a02070] border border-[#e040a0]/30 font-bold">
+              24H HORIZON
+            </div>
+</div>
+<!-- Chart Canvas Container -->
+<div class="relative w-full h-64 lg:h-72 bg-gradient-to-b from-[#fef8fc] to-[#ffffff] rounded-2xl p-3 border border-[#e040a0]/15">
+<canvas id="demandForecastChart"></canvas>
+</div>
+<!-- Legend Custom Badges -->
+<div class="grid grid-cols-2 gap-3 text-xs pt-1">
+<div class="flex items-center space-x-3 bg-[#fdf5fa] p-3 rounded-full border border-[#907898]/20">
+<span class="w-3.5 h-2 bg-[#7c52aa] rounded-full shrink-0"></span>
+<div class="truncate">
+<span class="text-[#2e1a28] font-bold block truncate text-xs">Actual Unoptimized</span>
+<span class="text-[#604868] mono font-bold text-[11px]">Peak: 128.4 kW</span>
+</div>
+</div>
+<div class="flex items-center space-x-3 bg-[#ffd6ee]/40 p-3 rounded-full border border-[#e040a0]/30 shadow-sm">
+<span class="w-3.5 h-2 bg-[#e040a0] rounded-full shrink-0 shadow-[0_0_6px_#e040a0]"></span>
+<div class="truncate">
+<span class="text-[#a02070] font-bold block truncate text-xs">Optimized Schedule</span>
+<span class="text-[#e040a0] mono font-bold text-[11px]">Peak: 98.1 kW</span>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-between text-xs text-[#604868] px-1 border-t border-[#e040a0]/15 pt-3">
+<span class="flex items-center gap-2">
+<span class="w-3.5 h-0.5 border-t-2 border-dashed border-[#e040a0]/70"></span>
+<span class="font-medium">Threshold Limit: 110 kW</span>
+</span>
+<span class="text-[#e040a0] font-extrabold bg-[#ffd6ee]/50 px-2.5 py-0.5 rounded-full">Net Energy Delta: -23.6%</span>
+</div>
+</section>
+<!-- DYNAMIC TIME SLIDER & HOUR SCRUBBER -->
+<section class="candy-card p-5 shadow-sm space-y-4">
+<div class="flex items-center justify-between">
+<div class="flex items-center space-x-2">
+<div class="w-6 h-6 rounded-full bg-[#ffd6ee] flex items-center justify-center text-[#e040a0]">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg>
+</div>
+<span class="text-xs font-extrabold text-[#2e1a28] uppercase tracking-wider">Dynamic Hour Scrubber</span>
+</div>
+<div class="text-xs mono font-black text-[#ffffff] bg-[#e040a0] px-3.5 py-1 rounded-full shadow-[0_0_12px_rgba(224,64,160,0.35)]" id="currentScrubbedHourDisplay">
+              14:00 (2:00 PM)
+            </div>
+</div>
+<!-- Range Slider -->
+<div class="px-1">
+<input class="w-full cursor-pointer" id="hourSlider" max="20" min="8" step="1" type="range" value="14"/>
+<div class="flex justify-between text-xs text-[#604868] mono font-medium mt-2">
+<span>08:00 AM</span>
+<span>12:00 PM</span>
+<span>04:00 PM</span>
+<span>08:00 PM</span>
+</div>
+</div>
+<!-- Quick Preset Hour Buttons (Rounded-Full Pill Shapes) -->
+<div class="grid grid-cols-4 gap-2.5 pt-1">
+<button class="hour-btn py-2 px-3 rounded-full text-xs font-bold bg-[#fdf5fa] text-[#604868] border border-[#e040a0]/20 hover:bg-[#ffd6ee]/50 hover:text-[#a02070] transition-all" data-hour="10" onclick="setHour(10)">10:00</button>
+<button class="hour-btn py-2 px-3 rounded-full text-xs font-bold bg-[#fdf5fa] text-[#604868] border border-[#e040a0]/20 hover:bg-[#ffd6ee]/50 hover:text-[#a02070] transition-all" data-hour="12" onclick="setHour(12)">12:00</button>
+<button class="hour-btn active py-2 px-3 rounded-full text-xs font-black bg-[#e040a0] text-white shadow-[0_2px_12px_rgba(224,64,160,0.4)] border border-[#e040a0]" data-hour="14" onclick="setHour(14)">14:00</button>
+<button class="hour-btn py-2 px-3 rounded-full text-xs font-bold bg-[#fdf5fa] text-[#604868] border border-[#e040a0]/20 hover:bg-[#ffd6ee]/50 hover:text-[#a02070] transition-all" data-hour="17" onclick="setHour(17)">17:00</button>
+</div>
+</section>
+</div>
+<!-- RIGHT COLUMN: CAMPUS OPERATIONS, ROI & LOGS (lg:col-span-5) -->
+<div class="lg:col-span-5 space-y-6">
+<!-- ZONE LOAD BREAKDOWN -->
+<section class="space-y-3.5">
+<div class="flex items-center justify-between">
+<span class="text-xs font-extrabold tracking-wider uppercase text-[#604868]">Campus Zone Status</span>
+<span class="text-xs text-[#2e1a28] font-bold flex items-center gap-1.5 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+<span class="w-2 h-2 rounded-full bg-emerald-500"></span>Auto-Balancing
+</span>
+</div>
+<!-- Block-A Card -->
+<div class="candy-card p-4 border-2 border-[#e040a0]/40 shadow-sm relative transition-all hover:border-[#e040a0]">
+<div class="flex items-start justify-between">
+<div>
+<div class="flex items-center space-x-2">
+<h3 class="text-sm font-extrabold text-[#2e1a28]">Block-A (Academic Complex)</h3>
+<span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-[#e040a0] text-white shadow-sm">ACTIVE</span>
+</div>
+<p class="text-[11px] text-[#604868] mt-1 font-medium">Lecture Theatres 1-8 • VAV AHU-1 &amp; AHU-2</p>
+</div>
+<div class="text-right shrink-0">
+<span class="text-base font-black text-[#e040a0] mono block">42.8 kW</span>
+<span class="text-[10px] font-bold text-[#7c52aa] bg-[#eedcff] px-2 py-0.5 rounded-full inline-block mt-0.5">Setpoint: 24.8°C</span>
+</div>
+</div>
+<div class="mt-3 pt-2.5 border-t border-[#e040a0]/15 flex items-center justify-between text-xs text-[#2e1a28]">
+<span>Occupancy: <strong class="text-[#e040a0] font-black">340 Students</strong></span>
+<span class="text-[11px] mono text-[#604868] font-semibold">Airflow: 100% (Normal)</span>
+</div>
+</div>
+<!-- Lab-Wing Card -->
+<div class="candy-card p-4 border-2 border-[#e040a0]/40 shadow-sm relative transition-all hover:border-[#e040a0]">
+<div class="flex items-start justify-between">
+<div>
+<div class="flex items-center space-x-2">
+<h3 class="text-sm font-extrabold text-[#2e1a28]">Lab-Wing (IoT &amp; AI Labs)</h3>
+<span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-[#e040a0] text-white shadow-sm">ACTIVE</span>
+</div>
+<p class="text-[11px] text-[#604868] mt-1 font-medium">Precision Cooling &amp; Clean Labs • AHU-3</p>
+</div>
+<div class="text-right shrink-0">
+<span class="text-base font-black text-[#e040a0] mono block">36.5 kW</span>
+<span class="text-[10px] font-bold text-[#7c52aa] bg-[#eedcff] px-2 py-0.5 rounded-full inline-block mt-0.5">Setpoint: 23.5°C</span>
+</div>
+</div>
+<div class="mt-3 pt-2.5 border-t border-[#e040a0]/15 flex items-center justify-between text-xs text-[#2e1a28]">
+<span>Occupancy: <strong class="text-[#e040a0] font-black">120 Students</strong></span>
+<span class="text-[11px] mono text-[#604868] font-semibold">Airflow: 85% (Optimized)</span>
+</div>
+</div>
+<!-- Block-B Card (Throttled) -->
+<div class="candy-card p-4 border border-[#e040a0]/20 bg-[#faf3f8]/70 shadow-sm relative">
+<div class="flex items-start justify-between">
+<div>
+<div class="flex items-center space-x-2">
+<h3 class="text-sm font-extrabold text-[#604868]">Block-B (Auditorium &amp; Seminar)</h3>
+<span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-amber-100 text-amber-800 border border-amber-300">THROTTLED (20%)</span>
+</div>
+<p class="text-[11px] text-[#907898] mt-1 font-medium">No Timetable Sessions Scheduled</p>
+</div>
+<div class="text-right shrink-0">
+<span class="text-base font-black text-[#604868] mono block">6.2 kW</span>
+<span class="text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full inline-block mt-0.5">Eco Idle</span>
+</div>
+</div>
+<div class="mt-3 pt-2.5 border-t border-[#e040a0]/15 flex items-center justify-between text-xs text-[#604868]">
+<span>Occupancy: <strong class="text-[#2e1a28] font-bold">0 Students</strong></span>
+<span class="text-[11px] mono text-amber-800 font-bold bg-amber-50 px-2 py-0.5 rounded-full">Chiller Loop Bypassed</span>
+</div>
+</div>
+</section>
+<!-- FINANCIAL & CARBON ROI PANEL -->
+<section class="candy-card p-5 shadow-sm">
+<div class="flex items-center justify-between mb-2">
+<div class="flex items-center space-x-2">
+<div class="w-6 h-6 rounded-full bg-[#ffd6ee] flex items-center justify-center text-[#e040a0]">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg>
+</div>
+<h2 class="text-xs font-extrabold text-[#2e1a28] uppercase tracking-wider">Financial &amp; Carbon ROI</h2>
+</div>
+<span class="text-xs text-[#604868] font-medium bg-[#fdf5fa] px-2.5 py-0.5 rounded-full border border-[#e040a0]/15">Billing cycle day 18</span>
+</div>
+<div class="grid grid-cols-2 gap-3.5 mt-3">
+<div class="candy-card-subtle p-3.5 rounded-2xl">
+<span class="text-xs text-[#604868] block font-bold">Daily Cost Savings</span>
+<div class="text-2xl font-black text-[#e040a0] mono mt-1">₹4,322<span class="text-xs text-[#604868] font-normal">/day</span></div>
+<span class="text-[11px] text-[#a02070] font-semibold block mt-1">Est. ₹1.29L monthly</span>
+</div>
+<div class="candy-card-subtle p-3.5 rounded-2xl">
+<span class="text-xs text-[#604868] block font-bold">Carbon Offset</span>
+<div class="text-2xl font-black text-[#7c52aa] mono mt-1">354.4 <span class="text-xs text-[#604868] font-normal">kg</span></div>
+<span class="text-[11px] text-[#7c52aa] font-semibold block mt-1">CO₂ avoided today</span>
+</div>
+</div>
+</section>
+<!-- BMS LIVE ACTION LOG TERMINAL -->
+<section class="candy-card p-5 shadow-sm space-y-3 bg-[#ffffff]">
+<div class="flex items-center justify-between border-b border-[#e040a0]/15 pb-3">
+<div class="flex items-center space-x-2">
+<div class="flex space-x-1.5">
+<span class="w-2.5 h-2.5 rounded-full bg-[#e040a0]"></span>
+<span class="w-2.5 h-2.5 rounded-full bg-[#f080c0]"></span>
+<span class="w-2.5 h-2.5 rounded-full bg-[#7c52aa]"></span>
+</div>
+<span class="text-xs font-extrabold text-[#2e1a28] tracking-wider uppercase mono ml-1">BMS Live Action Log</span>
+</div>
+<span class="text-[10px] mono text-[#e040a0] font-bold flex items-center gap-1.5 bg-[#ffd6ee]/60 px-2.5 py-1 rounded-full border border-[#e040a0]/30">
+<span class="w-1.5 h-1.5 rounded-full bg-[#e040a0] inline-block animate-ping"></span>
+              STREAMING
+            </span>
+</div>
+<div class="space-y-2.5 text-xs mono pt-1 max-h-56 overflow-y-auto leading-relaxed">
+<div class="flex items-start space-x-2 bg-[#fdf5fa] p-2 rounded-xl border border-[#e040a0]/10">
+<span class="text-[#e040a0] shrink-0 font-bold bg-[#ffd6ee] px-1.5 py-0.5 rounded-full text-[10px]">[14:02:18]</span>
+<span class="text-[#2e1a28] font-medium text-[11px]">Block-B VAV damper throttled to 20% following timetable vacancy event.</span>
+</div>
+<div class="flex items-start space-x-2 bg-[#fdf5fa] p-2 rounded-xl border border-[#e040a0]/10">
+<span class="text-[#e040a0] shrink-0 font-bold bg-[#ffd6ee] px-1.5 py-0.5 rounded-full text-[10px]">[13:58:45]</span>
+<span class="text-[#2e1a28] font-medium text-[11px]">Dry mode confirmed on AHU-1; ambient humidity elevated at 64% RH.</span>
+</div>
+<div class="flex items-start space-x-2 bg-[#fdf5fa] p-2 rounded-xl border border-[#e040a0]/10">
+<span class="text-[#e040a0] shrink-0 font-bold bg-[#ffd6ee] px-1.5 py-0.5 rounded-full text-[10px]">[13:45:10]</span>
+<span class="text-[#2e1a28] font-medium text-[11px]">Pre-cooling initiated in Lab-Wing IoT Section for upcoming 14:00 lecture.</span>
+</div>
+<div class="flex items-start space-x-2 bg-[#fdf5fa] p-2 rounded-xl border border-[#e040a0]/10">
+<span class="text-[#e040a0] shrink-0 font-bold bg-[#ffd6ee] px-1.5 py-0.5 rounded-full text-[10px]">[13:30:00]</span>
+<span class="text-[#2e1a28] font-medium text-[11px]">Thermal safety check passed: Target 25.1°C conforms to BEE ΔT &lt; 12°C limit.</span>
+</div>
+<div class="flex items-start space-x-2 bg-[#fdf5fa] p-2 rounded-xl border border-[#e040a0]/10 opacity-80">
+<span class="text-[#e040a0] shrink-0 font-bold bg-[#ffd6ee] px-1.5 py-0.5 rounded-full text-[10px]">[13:15:22]</span>
+<span class="text-[#2e1a28] font-medium text-[11px]">Peak load shaved by 6.4 kW via intelligent chiller sequencing routine.</span>
+</div>
+</div>
+</section>
+</div>
+</div>
+</main>
+<script>
+    // Initialize Chart.js with Candy joyful pop palette
+    const ctx = document.getElementById('demandForecastChart').getContext('2d');
+    
+    // Candy pink translucent gradient fill
+    const gradient = ctx.createLinearGradient(0, 0, 0, 240);
+    gradient.addColorStop(0, 'rgba(224, 64, 160, 0.28)');
+    gradient.addColorStop(1, 'rgba(255, 214, 238, 0.04)');
+
+    const chartData = {
+      labels: ['08:00', '10:00', '12:00', '14:00', '16:00', '18:00', '20:00'],
+      datasets: [
+        {
+          label: 'Threshold',
+          data: [110, 110, 110, 110, 110, 110, 110],
+          borderColor: 'rgba(224, 64, 160, 0.4)',
+          borderWidth: 1.8,
+          borderDash: [5, 5],
+          pointRadius: 0,
+          fill: false,
+          tension: 0
+        },
+        {
+          label: 'Unoptimized Demand',
+          data: [65, 92, 118, 128.4, 112, 74, 45],
+          borderColor: '#7c52aa',
+          backgroundColor: 'transparent',
+          borderWidth: 2.2,
+          pointRadius: 4,
+          pointBackgroundColor: '#7c52aa',
+          fill: false,
+          tension: 0.35
+        },
+        {
+          label: 'BEE Optimized',
+          data: [58, 78, 94, 98.1, 88, 62, 38],
+          borderColor: '#e040a0',
+          backgroundColor: gradient,
+          borderWidth: 3,
+          pointRadius: 5,
+          pointBackgroundColor: '#e040a0',
+          pointBorderColor: '#ffffff',
+          pointBorderWidth: 2,
+          fill: true,
+          tension: 0.35
+        }
+      ]
+    };
+
+    const demandChart = new Chart(ctx, {
+      type: 'line',
+      data: chartData,
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false
+          },
+          tooltip: {
+            backgroundColor: '#2e1a28',
+            titleColor: '#ffd6ee',
+            bodyColor: '#ffffff',
+            borderColor: 'rgba(224, 64, 160, 0.4)',
+            borderWidth: 1.5,
+            padding: 10,
+            cornerRadius: 12,
+            titleFont: { family: 'DM Sans', size: 12, weight: 'bold' },
+            bodyFont: { family: 'JetBrains Mono', size: 11 },
+            displayColors: true,
+            callbacks: {
+              label: function(context) {
+                return ` ${context.dataset.label}: ${context.parsed.y} kW`;
+              }
+            }
+          }
+        },
+        scales: {
+          x: {
+            grid: {
+              color: 'rgba(224, 64, 160, 0.08)',
+              drawBorder: false
+            },
+            ticks: {
+              color: '#604868',
+              font: { family: 'JetBrains Mono', size: 10, weight: '500' }
+            }
+          },
+          y: {
+            min: 20,
+            max: 140,
+            grid: {
+              color: 'rgba(224, 64, 160, 0.08)',
+              drawBorder: false
+            },
+            ticks: {
+              color: '#604868',
+              font: { family: 'JetBrains Mono', size: 10, weight: '500' },
+              callback: function(value) {
+                return value + ' kW';
+              }
+            }
+          }
+        }
+      }
+    });
+
+    // Time Scrubber Interaction
+    const hourSlider = document.getElementById('hourSlider');
+    const hourDisplay = document.getElementById('currentScrubbedHourDisplay');
+    const buttons = document.querySelectorAll('.hour-btn');
+
+    function updateHourUI(hour) {
+      hourSlider.value = hour;
+      const formatted = `${hour < 10 ? '0' + hour : hour}:00 (${hour > 12 ? (hour - 12) + ':00 PM' : hour + ':00 AM'})`;
+      hourDisplay.textContent = formatted;
+
+      buttons.forEach(btn => {
+        if (parseInt(btn.getAttribute('data-hour')) === parseInt(hour)) {
+          btn.className = 'hour-btn active py-2 px-3 rounded-full text-xs font-black bg-[#e040a0] text-white shadow-[0_2px_12px_rgba(224,64,160,0.4)] border border-[#e040a0]';
+        } else {
+          btn.className = 'hour-btn py-2 px-3 rounded-full text-xs font-bold bg-[#fdf5fa] text-[#604868] border border-[#e040a0]/20 hover:bg-[#ffd6ee]/50 hover:text-[#a02070] transition-all';
+        }
+      });
+    }
+
+    hourSlider.addEventListener('input', (e) => {
+      updateHourUI(e.target.value);
+    });
+
+    function setHour(hour) {
+      updateHourUI(hour);
+    }
+  </script>
+</body></html>
